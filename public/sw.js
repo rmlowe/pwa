@@ -45,14 +45,12 @@ self.addEventListener('activate', function (event) {
 });
 
 function isInArray(string, array) {
-  var cachePath;
-  if (string.indexOf(self.origin) === 0) { // request targets domain where we serve the page from (i.e. NOT a CDN)
-    console.log('matched', string);
-    cachePath = string.substring(self.origin.length); // take the part of the URL AFTER the domain (e.g. after localhost:8080)
-  } else {
-    cachePath = string; // store the full request (for CDNs)
+  for (var i = 0; i < array.length; i++) {
+    if (array[i] === string) {
+      return true;
+    }
   }
-  return array.indexOf(cachePath) > -1;
+  return false;
 }
 
 self.addEventListener('fetch', function (event) {
@@ -91,7 +89,7 @@ self.addEventListener('fetch', function (event) {
               .catch(function (err) {
                 return caches.open(CACHE_STATIC_NAME)
                   .then(function (cache) {
-                    if (event.request.url.indexOf('/help')) {
+                    if (event.request.headers.get('accept').includes('text/html')) {
                       return cache.match('/offline.html');
                     }
                   });
